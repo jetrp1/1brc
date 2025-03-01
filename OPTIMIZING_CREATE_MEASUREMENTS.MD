@@ -46,9 +46,9 @@ Now this is quickly going to become I/O limited and to further benchmark but I t
 Some ideas I have for improvement
 - less/no writing to stdout
 - random.Random get initialized every instance
+- writing to the file in batches
 - string parsing in get_city_names
 - avoiding for loops? (I heard they are slower and maybe should use while loops instead)
-- writing to the file in batches
 
 
 ### Adding the option to remove the progress bar
@@ -131,11 +131,95 @@ Average Execution Times:
 looks like its time to increase the number of rows we create, lets increase from 1 million to 100 million. Here is the current run time for 100 million rows for reference.
 
 ```
+$ ./benchmark_cm_avg.sh 100_000_000
+Starting Benchmark
+Benchmark completed!
+Average Execution Times:
+  Real: 144.619s
+  User: 142.043s
+  Sys:  2.348s
+```
+
+now I suspect that we have hit our I/O limits since pretty much all our time was spent in User time
+
+
+### Writing to the file in batches
+
+So I/O is our limiting factor now. Hard Drives and SSDs work in sectors at the hardware level, older drives typically use a sector size of 512 bytes and modern HDDs and SSDs usually have a sector size of 4k (4096) bytes. so lets try and write in chunks. Now i think it will be rather expensive to track the length of the buffer after each time we add to it, so instead we will just write the buffer after a specific number of lines have been processed. 
+
+```py
+def build_file(file, num_rows: int, num_keys: int, quiet):
+    UPDATE_FREQ = num_rows/1000
+    LINES_PER_WRITE = ???       # const for number of lines to write per cycle
+
+    # get a list of Keys
+    keys = get_city_names()
+
+    with open(file, 'w') as outFile:
+        buffer = str()
+
+        # generate the data
+        for i in range(num_rows):
+            city = random.choice(keys)
+            temp = get_temp_string()
+            buffer = buffer + f'{city},{temp}\n'   # could this cause some issues?
+
+            if i % LINES_PER_WRITE == 0:    # write only every LINES_PER_WRITE lines
+                outFile.write(buffer)
+                buffer = str()
+           
+            if not quiet and i % UPDATE_FREQ == 0: 
+                progress_bar(i, num_rows-1, prefix='Progress:', length=100)
+            
+        outFile.write(buffer)   # don't forget to write the last bit of lines
+        buffer = str()
+```
+
+How to we decide how many lines to write? well I'm not great with AWK so I asked chatGPT to write me an AWK script to get me the average over our 100 million lines file we made earlier.
+
+```sh
+$ awk '{ total += length } END { print total / NR }' ./benchmarking_data/measurements_benchmark.csv
+14.0817
+```
+
+So 14 bytes per line, well 4096 / 14 = 292.5 so lets go with 293. It's oddly specific but our code can handle it. 
+
+```sh
+$ ./benchmark_cm_avg.sh 100_000_000
+Starting Benchmark
+Benchmark completed!
+Average Execution Times:
+  Real: 156.018s
+  User: 153.153s
+  Sys:  2.638s
 
 ```
 
-now I suspect that we have hit our I/O limits since my CPU is sitting right close to idle  
+Well, that made it worse. I fear that any improvement we get here isn't going to be very much. Lets shoot for writing every 1 million lines, this is trading off RAM for less write operations and allowing the SSD in my system to operate more efficiently.
+
+```
+$ ./benchmark_cm_avg.sh 100_000_000
+Starting Benchmark
+Benchmark completed!
+Average Execution Times:
+  Real: 139.037s
+  User: 136.511s
+  Sys:  2.475s
+```
+
+Well thats a bit better, a whole 5 seconds faster.
+
+
+### Using Buffers instead of writing in batches
+
+Another options is to use the builtin buffer system for writing to the file. Maybe python's implementation of this concept is better than mine. Here is the updated build file code:
+
+```
+```
 
 
 
-### 
+
+
+
+other ideas include playing with how python writes to the disk. maybe look into the buffering systems?
