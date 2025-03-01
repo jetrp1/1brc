@@ -30,8 +30,9 @@ def get_city_names() -> list:
 
 r = random.Random()
 def get_temp_string() -> str:
-    temp = r.random() * 100
-    return f'{temp:.3}'
+    sign = r.choice([1,-1])
+    temp = r.random() * 100 * sign
+    return f'{temp:.2f}'
 
 
 def build_file(file, num_rows: int, num_keys: int, quiet):
