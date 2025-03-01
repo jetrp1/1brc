@@ -1,4 +1,4 @@
-import sys
+#!/bin/env python3
 
 def calc_average(file_name):
     result_avg = {}
