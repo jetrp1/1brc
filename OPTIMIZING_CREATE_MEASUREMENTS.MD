@@ -212,14 +212,37 @@ Well thats a bit better, a whole 5 seconds faster.
 
 ### Using Buffers instead of writing in batches
 
-Another options is to use the builtin buffer system for writing to the file. Maybe python's implementation of this concept is better than mine. Here is the updated build file code:
+Another options is to use the builtin buffer system for writing to the file. Maybe python's implementation of this concept is better than mine. Here is the updated build file function:
+
+```py
+def build_file(file, num_rows: int, num_keys: int, quiet):
+    UPDATE_FREQ = num_rows/1000
+
+    # get a list of Keys
+    keys = get_city_names()
+
+    with open(file, 'w', buffering=1024 * 1000) as outFile:  # 1024 * 1000 means we will use a buffer of 1MB
+
+        # generate the data
+        for i in range(num_rows):
+            city = random.choice(keys)
+            temp = get_temp_string()
+            outFile.write(f'{city},{temp}\n')
+           
+            if not quiet and i % UPDATE_FREQ == 0: 
+                progress_bar(i, num_rows-1, prefix='Progress:', length=100)
+```
+
+After trying several different buffer sizes i decided on using a 40MB buffer size as that seemed to give the best performance. If someone is running this on a system with very little RAM then this large of a buffer might be an issue. 
 
 ```
+$ ./benchmark_cm_avg.sh 100_000_000
+Starting Benchmark
+Benchmark completed!
+Average Execution Times:
+  Real: 121.608s
+  User: 120.437s
+  Sys:  1.144s
 ```
 
-
-
-
-
-
-other ideas include playing with how python writes to the disk. maybe look into the buffering systems?
+## Conclusion

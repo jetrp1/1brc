@@ -36,30 +36,21 @@ def get_temp_string() -> str:
 
 def build_file(file, num_rows: int, num_keys: int, quiet):
     UPDATE_FREQ = num_rows/1000
-    LINES_PER_WRITE = 1_000_000
 
     # get a list of Keys
     keys = get_city_names()
 
-    with open(file, 'w') as outFile:
-        buffer = str()
+    with open(file, 'w', buffering=4096 * 10000) as outFile:
 
         # generate the data
         for i in range(num_rows):
             city = random.choice(keys)
             temp = get_temp_string()
-            buffer = buffer + f'{city},{temp}\n'
-
-            if i % LINES_PER_WRITE == 0:            
-                outFile.write(buffer)
-                buffer = str()
+            outFile.write(f'{city},{temp}\n')
            
             if not quiet and i % UPDATE_FREQ == 0: 
                 progress_bar(i, num_rows-1, prefix='Progress:', length=100)
             
-        outFile.write(buffer)
-        buffer = []
-
 
 # This should simply call the generate function. There shouldn't be any real functionality here except for what is needed to make the CLI function
 if __name__ == '__main__':

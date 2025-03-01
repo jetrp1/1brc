@@ -11,7 +11,7 @@ for i in $(seq 1 $num_runs); do
     echo -ne "Run $i/$num_runs...\r"  # Overwrites the line instead of printing new ones
 
     # Run the script silently, capturing only execution times
-    { time ./create_measurements.py "$1" "$outfile" > /dev/null; } 2> time_output.txt
+    { time ./create_measurements.py "$1" -q "$outfile" > /dev/null; } 2> time_output.txt
 
     # Extract execution times
     real_time=$(grep real time_output.txt | awk '{print $2}')
