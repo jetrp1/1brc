@@ -44,4 +44,4 @@ if __name__ == '__main__':
     parser.add_argument('infile', type=str)
     args = parser.parse_args()
 
-    calc_average()
+    calc_average(args.infile)
