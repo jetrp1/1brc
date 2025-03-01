@@ -32,7 +32,7 @@ r = random.Random()
 def get_temp_string() -> str:
     sign = r.choice([1,-1])
     temp = r.random() * 100 * sign
-    return f'{temp:.2f}'
+    return f'{temp:.1f}'
 
 
 def build_file(file, num_rows: int, num_keys: int, quiet):
