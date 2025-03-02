@@ -44,6 +44,13 @@ if __name__ == '__main__':
     
     parser = ArgumentParser('calculate_average_baseline.py')
     parser.add_argument('infile', type=str)
+    parser.add_argument('-c', '--core_count', type=int, required=False, help='Specify the number of cores to use in processing')
+    parser.add_argument('-s', '--single_core', action='store_true', help='Sets the system to be single threaded operation')
     args = parser.parse_args()
 
-    print_measurements(calc_average(args.infile))
+#    print_measurements(calc_average(args.infile))
+
+    with open(args.infile, 'rb') as file:
+        line = file.readline()
+        while line:
+            line = file.readline()

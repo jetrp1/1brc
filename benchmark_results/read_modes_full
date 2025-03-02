@@ -1,0 +1,4 @@
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_r.py ./measurements/100M_Measurements.csv` | 100.081 ± 0.838 | 99.287 | 100.958 | 1.46 ± 0.01 |
+| `pypy3 ./calculate_average_rb.py ./measurements/100M_Measurements.csv` | 68.539 ± 0.283 | 68.349 | 68.864 | 1.00 |

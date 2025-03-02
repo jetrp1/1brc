@@ -5,7 +5,7 @@ def print_measurements(measurements: dict):
 
     for station in measurements.keys():
         min, sum, max, count = measurements[station]
-        results += f'{station}={min}/{sum/count:.1f}/{max}, '
+        results += f'{station.decode()}={min}/{sum/count:.1f}/{max}, '
     
     results += '}'
 
@@ -16,9 +16,9 @@ def calc_average(file_name):
     measurements = dict()
     # key: [min,sum,max,count]
     
-    with open(file_name, 'r') as dataset:
+    with open(file_name, 'rb') as dataset:
         for record in dataset:
-            station, value = record.split(',')
+            station, value = record.split(b',')
             value = float(value)
 
             # get current record
@@ -44,6 +44,8 @@ if __name__ == '__main__':
     
     parser = ArgumentParser('calculate_average_baseline.py')
     parser.add_argument('infile', type=str)
+    parser.add_argument('-c', '--core_count', type=int, required=False, help='Specify the number of cores to use in processing')
+    parser.add_argument('-s', '--single_core', action='store_true', help='Sets the system to be single threaded operation')
     args = parser.parse_args()
 
     print_measurements(calc_average(args.infile))
