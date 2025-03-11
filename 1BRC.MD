@@ -35,6 +35,8 @@ I have several different sizes of the measurements CSV that way I can test early
 - 100 Million
 - 1 Billion
 
+---
+
 ### Optimization Ideas
 
 Some ideas for optimizing this code:
@@ -48,7 +50,10 @@ Some ideas for optimizing this code:
 
 PyPy3 has shown to improve performance in many projects so ill run pretty much everything from now on using pypy. Below are the differences in the baseline time using pypy3 versus cPython3
 
-
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_baseline.py ./measurements/1B_Measurements.csv` | 979.168 ± 3.948 | 976.766 | 983.724 | 1.00 |
+| `python3 ./calculate_average_baseline.py ./measurements/1B_Measurements.csv` | 1733.957 ± 11.034 | 1721.578 | 1742.757 | 1.77 ± 0.01 |
 
 
 ### File Reading
@@ -70,13 +75,48 @@ Thats a rather stark difference, but I question weather the extra work needed to
 
 1.4 times as fast!
 
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_rb.py ./measurements/1B_Measurements.csv` | 666.263 ± 5.518 | 660.911 | 671.934 | 1.00 |
+
 
 ### Parallel Processing
 
-Parallel Processing I think will be the biggest improvement, so lets do that first. I'll create a dispatcher function and a measure block function. the dispatcher will load in the data and start off a job. the code will dynamically choose the number of cores to use unless otherwise specified
+Parallel Processing I think will be the biggest improvement. I'll create a dispatcher function and a measure block function. the dispatcher will load in the data and start off a job. the code will dynamically choose the number of cores to use unless otherwise specified.
+
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_mt.py ./measurements/1B_Measurements.csv` | 246.554 ± 0.181 | 246.352 | 246.700 | 1.00 |
+
+### Switching to a memory map for reading in files
+
+Ive seen a lot of people use mmap for reading in the file and I want to try that. My primary concern is that i do not have lots or ram on my system. Only 16gb and this is going to map this file (14gb) to my system memory. I want to avoid swapping also. So first I'll implement the mmap and run that to see if there are any improvements or if my system crashes due to and out of memory issue.
+
+So my system did not crash, and we have a improved time also.
+
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_mmap.py ./measurements/1B_Measurements.csv` | 189.611 ± 0.293 | 189.359 | 189.932 | 1.00 |
+
+So there is probably more to do here, but im not sure what that is, so lets move onto something else.
+
+### String Parsing and using Integers instead of floats
+
+So I know that string parsing is expensive, so since our data is so uniform instead of using the split function lets just find the comma and use list indexing instead. Now that alone isn't going to produce too much of a change, but now since we know that the integers will always have one digit after the decimal place we can treat these values as integers which should be much faster.
+
+the code is gross and not very readable, but it is fast:
+
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pypy3 ./calculate_average_int.py ./measurements/1B_Measurements.csv` | 144.804 ± 0.524 | 144.327 | 145.365 | 1.00 |
+
+### 
 
 
 
+
+
+### using Try-Catch instead of if station in 
 
 
 
