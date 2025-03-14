@@ -203,6 +203,6 @@ if __name__ == '__main__':
     else:
         coreCount = os.cpu_count()
 
-    results = dispatcher(args.infile, 1)
+    results = dispatcher(args.infile, coreCount)
     print_measurements(results)
 
