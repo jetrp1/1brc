@@ -21,21 +21,21 @@ I'll use hyperfine to benchmark my script. I'll do 3 Runs with one warm up run.
 
 ### Data Generation
 
-I am using a create_measurements.py file that I built myself since I do not want to install a java environment on my system.
+I am using a create_measurements.py file that I built myself since I do not want to install a java environment on my system. you can find it in the repo and i even did a bit of a speed analysis on it.
 
-### Baseline
+### Goal
 
-I have created myself a baseline to work from. Is really poor, and averages around 25 mins on my machine. I have heard of other people's attempts getting down to the sub 10 second range, that will be my goal for this.
+I have created myself a baseline to work from. It is really poor, and averages around 25 mins on my machine. I ran Doug Mercer's doug booty v4 version on my machine and it ran in around 2 mins so my goal is to get to a similar range. 
+
+Some things to note, my machine is a lot slower then others in the competition. Additionally I do not have enough ram to start a ram disk like many other folks are using. These two factors are why the script runs to much slower on my machine than the time Doug gets in his video.
 
 ### Diagnostic Tools
 
-I have several different sizes of the measurements CSV that way I can test early changes faster. The Sizes are:
-- 1 Million
-- 10 Million
-- 100 Million
-- 1 Billion
-
----
+Some tools I used:
+- Multiple sizes of measurements files
+- hyperfine
+- time (gnu tool)
+- viztracer (profiler)
 
 ### Optimization Ideas
 
@@ -73,7 +73,7 @@ Thats a rather stark difference, but I question weather the extra work needed to
 | `pypy3 ./calculate_average_r.py ./measurements/100M_Measurements.csv` | 100.081 ± 0.838 | 99.287 | 100.958 | 1.46 ± 0.01 |
 | `pypy3 ./calculate_average_rb.py ./measurements/100M_Measurements.csv` | 68.539 ± 0.283 | 68.349 | 68.864 | 1.00 |
 
-1.4 times as fast!
+and against the 1B rows:
 
 | Command | Mean [s] | Min [s] | Max [s] | Relative |
 |:---|---:|---:|---:|---:|
@@ -110,14 +110,6 @@ the code is gross and not very readable, but it is fast:
 |:---|---:|---:|---:|---:|
 | `pypy3 ./calculate_average_int.py ./measurements/1B_Measurements.csv` | 144.804 ± 0.524 | 144.327 | 145.365 | 1.00 |
 
-### 
+### Final Results
 
-
-
-
-
-### using Try-Catch instead of if station in 
-
-
-
-
+SO with all our improvements we have taken the script from running 1733 seconds down to 144 seconds. Ill say that is quite the improvement and within the goal set also. Not too bad. 
